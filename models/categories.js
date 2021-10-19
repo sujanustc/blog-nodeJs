@@ -30,7 +30,7 @@ module.exports = (sequelize, DataTypes) => {
       comment: "0 = pending, 1 = active, 2 = canceled"
     },
     adminId: {
-      type: DataType.INTEGER,
+      type: DataTypes.INTEGER,
       allowNull: false,
       comment: "Store the Admin ID who create this category. if the category edit by someone then replace the value with editor admin Id or if removed this cateogry by someone replace the value with the admin id who removed it",
     }

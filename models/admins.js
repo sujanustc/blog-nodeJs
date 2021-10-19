@@ -26,7 +26,8 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
     },
     password: {
-      type: DataTypes.STRING
+      type: DataTypes.STRING,
+      allowNull: false
     },
     address: {
       type: DataTypes.STRING
@@ -45,6 +46,9 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER(1),
       defaultValue: 1,
       comment: "0 = pending, 1 = active, 2 = canceled"
+    },
+    jwt: {
+      type: DataTypes.STRING
     }
   }, {
     sequelize,

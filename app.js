@@ -1,22 +1,30 @@
 const express = require('express')
 const app = express()
-const port = 3000
+const dotenv = require('dotenv')
 
 const { Sequelize, DataTypes } = require('sequelize');
+require('./models')
+
+// middleWare
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+//app.use(cookieParser());
 
 
-// Option 2: Passing parameters separately (other dialects)
-const sequelize = new Sequelize('blogpostDB', 'root', '', {
-  host: 'localhost',
-  dialect: 'mysql'
+
+// api route
+app.use('/api',require('./routes/api'))
+
+
+dotenv.config()
+app.get('/', (req, res) => res.send('Hello World! app'))
+
+// 404 page
+app.use((req, res, next) =>{
+  res.status(404).send('404   404')
 });
 
-try {
-    sequelize.authenticate();
-    console.log('Connection has been established successfully.');
-  } catch (error) {
-    console.error('Unable to connect to the database:', error);
-  }
 
-app.get('/', (req, res) => res.send('Hello World!'))
-app.listen(port, () => console.log(`App listening at http://localhost:${port} !!!`))
+
+
+app.listen(process.env.PORT, () => console.log(`App listening at http://localhost:${process.env.PORT} !!!`))
