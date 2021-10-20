@@ -1,7 +1,5 @@
-'use strict';
-const {
-  Model
-} = require('sequelize');
+"use strict";
+const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   class categories extends Model {
     /**
@@ -12,33 +10,37 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
     }
-  };
-  categories.init({
-    name: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      unique: true
+  }
+  categories.init(
+    {
+      name: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true,
+      },
+      slug: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true,
+      },
+      status: {
+        type: DataTypes.INTEGER(),
+        defaultValue: 1,
+        comment: "0 = pending, 1 = active, 2 = canceled",
+      },
+      adminId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        comment:
+          "Store the Admin ID who create this category. if the category edit by someone then replace the value with editor admin Id or if removed this cateogry by someone replace the value with the admin id who removed it",
+      },
     },
-    slag: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      unique: true
-    },
-    status: {
-      type: DataTypes.INTEGER(),
-      defaultValue: 1,
-      comment: "0 = pending, 1 = active, 2 = canceled"
-    },
-    adminId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      comment: "Store the Admin ID who create this category. if the category edit by someone then replace the value with editor admin Id or if removed this cateogry by someone replace the value with the admin id who removed it",
+    {
+      sequelize,
+      modelName: "categories",
+      tableName: "categories",
+      paranoid: true,
     }
-  }, {
-    sequelize,
-    modelName: 'categories',
-    tableName: 'categories',
-    paranoid: true
-  });
+  );
   return categories;
 };

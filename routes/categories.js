@@ -1,7 +1,13 @@
-const express = require('express')
+const express = require("express");
 const route = express.Router();
-const {addCategory} = require('../controllers/categoryController')
+const {
+  addCategory,
+  updateCategory,
+  deleteCategory,
+} = require("../controllers/categoryController");
 
-route.post('/addCategory', addCategory)
+route.post("/addCategory", addCategory);
+route.post("/updateCategory", updateCategory);
+route.delete("/deleteCategory", deleteCategory);
 
-module.exports = route
+module.exports = route;
