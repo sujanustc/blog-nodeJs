@@ -18,7 +18,7 @@ app.get("/", (req, res) => res.send("Hello World! app"));
 
 // 404 page
 app.use((req, res, next) => {
-  res.status(404).send("404   404");
+  res.status(404).json({ error: "404 page not found" });
 });
 
 app.listen(process.env.PORT, () =>

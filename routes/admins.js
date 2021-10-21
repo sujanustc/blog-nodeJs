@@ -1,17 +1,17 @@
-const express = require('express')
+const express = require("express");
 const route = express.Router();
-const {adminLogin, adminRegister} = require('../controllers/adminController')
-const {verify} = require('../utils/verifyToken')
+const { adminLogin, adminRegister } = require("../controllers/adminController");
+const { verifyToken } = require("../utils/utils");
 
-route.get('/', (req, res)=>{
-    res.json({msg: "admin route home"})
-})
+route.get("/", (req, res) => {
+  res.json({ msg: "admin route home" });
+});
 
-route.post('/login', adminLogin)
+route.post("/login", adminLogin);
 
-route.post('/register', adminRegister)
+route.post("/register", adminRegister);
 
-route.use('/category',verify, require('./categories'))
-//route.use('/post', require('./posts'))
+route.use("/category", verifyToken, require("./categories"));
+route.use("/post", verifyToken, require("./posts"));
 
-module.exports = route
+module.exports = route;

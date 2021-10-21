@@ -9,6 +9,7 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      // categories.hasMany(models.admin_category_histories);
     }
   }
   categories.init(
@@ -28,12 +29,12 @@ module.exports = (sequelize, DataTypes) => {
         defaultValue: 1,
         comment: "0 = pending, 1 = active, 2 = canceled",
       },
-      adminId: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        comment:
-          "Store the Admin ID who create this category. if the category edit by someone then replace the value with editor admin Id or if removed this cateogry by someone replace the value with the admin id who removed it",
-      },
+      // adminId: {
+      //   type: DataTypes.INTEGER,
+      //   allowNull: false,
+      //   comment:
+      //     "Store the Admin ID who create this category. if the category edit by someone then replace the value with editor admin Id or if removed this cateogry by someone replace the value with the admin id who removed it",
+      // },
     },
     {
       sequelize,

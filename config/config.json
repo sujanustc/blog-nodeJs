@@ -4,20 +4,24 @@
     "password": null,
     "database": "blogpostDB",
     "host": "127.0.0.1",
-    "dialect": "mysql"
+    "dialect": "mysql",
+    "timezone": "+06:00"
   },
   "test": {
     "username": "root",
     "password": null,
     "database": "blogpostDB",
     "host": "127.0.0.1",
-    "dialect": "mysql"
+    "dialect": "mysql",
+    "timezone": "+06:00"
   },
   "production": {
     "username": "root",
     "password": null,
     "database": "blogpostDB",
     "host": "127.0.0.1",
-    "dialect": "mysql"
+    "dialect": "mysql",
+    "timezone": "+06:00"
   }
+
 }
