@@ -4,17 +4,19 @@ const Post = require("../models").posts;
 const Admin = require("../models").admins;
 const ACH = require("../models").admin_category_histories;
 const APH = require("../models").admin_post_histories;
+const Sequelize = require("sequelize");
+const Op = Sequelize.Op;
 
 //Function for verifying  JWT
 const verifyToken = async (req, res, next) => {
   const token = req.query.token;
-  if (!token) return res.status(401).send("access denied");
+  if (!token) return res.status(401).json({ message: "access denied" });
   try {
     const verified = jwt.verify(token, process.env.TOKEN_SECRET);
     req.user = verified;
     next();
   } catch (err) {
-    res.status(400).send("invalid token");
+    res.status(400).json({ message: "invalid token" });
   }
 };
 
@@ -34,6 +36,7 @@ const findCategoryBySlug = async (slug) => {
     where: {
       slug: slug,
     },
+    paranoid: false,
   });
   return result;
 };
@@ -81,6 +84,7 @@ const findPostBySlug = async (slug) => {
     where: {
       slug: slug,
     },
+    paranoid: false,
   });
   return result;
 };
@@ -94,6 +98,76 @@ const updatePostHistory = async (token, postId, type) => {
   });
 };
 
+const forceFindCategoryByName = async (name) => {
+  const result = await Category.findOne({
+    where: {
+      name: name,
+      deletedAt: {
+        [Op.ne]: null,
+      },
+    },
+    paranoid: false,
+  });
+  return result;
+};
+
+const forceFindCategoryById = async (id) => {
+  const result = await Category.findOne({
+    where: {
+      id: id,
+      deletedAt: {
+        [Op.ne]: null,
+      },
+    },
+    paranoid: false,
+  });
+  return result;
+};
+
+const findPostById = async (id) => {
+  const result = await Post.findOne({
+    where: {
+      id: id,
+    },
+  });
+  return result;
+};
+
+const getPostByTitle = async (title) => {
+  const reslult = await Post.findOne({
+    where: {
+      title: title,
+    },
+  });
+  return reslult;
+};
+
+const forceFindPostByTitle = async (title) => {
+  const result = await Post.findOne({
+    where: {
+      title: title,
+      deletedAt: {
+        [Op.ne]: null,
+      },
+    },
+    paranoid: false,
+  });
+  return result;
+};
+
+const forceFindPostById = async (id) => {
+  const result = await Post.findOne({
+    where: {
+      id: id,
+      deletedAt: {
+        [Op.ne]: null,
+      },
+    },
+    paranoid: false,
+  });
+  return result;
+};
+
 module.exports = {
   slugMaker,
   verifyToken,
@@ -104,4 +178,10 @@ module.exports = {
   updateCategoryHistory,
   findPostBySlug,
   updatePostHistory,
+  forceFindCategoryByName,
+  forceFindCategoryById,
+  findPostById,
+  getPostByTitle,
+  forceFindPostByTitle,
+  forceFindPostById,
 };
