@@ -38,6 +38,12 @@ module.exports = (sequelize, DataTypes) => {
       },
       keywords: {
         type: DataTypes.STRING,
+
+        get() {
+          const rawValue = this.getDataValue("keywords");
+
+          return rawValue ? JSON.parse(rawValue) : null;
+        },
       },
     },
     {

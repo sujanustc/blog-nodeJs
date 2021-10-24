@@ -11,5 +11,6 @@ route.post("/login", userLogin);
 route.post("/register", userRegister);
 route.use("/category", verifyToken, require("./categories"));
 route.use("/post", verifyToken, require("./posts"));
+route.use("/comment", verifyToken, require("./comment"));
 
 module.exports = route;

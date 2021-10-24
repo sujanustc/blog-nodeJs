@@ -26,6 +26,12 @@ const addCategory = async (req, res) => {
       message: "Name must be more then three character long!",
     });
 
+  if ((await checkRole(token)) != 1)
+    return res.json({
+      status: false,
+      message: "Only Admin Can Add An Category!",
+    });
+
   //Checking category with same name is already exist or not
   if (await findCategoryByName(name))
     return res.json({ status: false, message: "This Category Already Exist" });
@@ -66,16 +72,22 @@ const updateCategory = async (req, res) => {
   if (!name || !categoryId)
     return res.json({ status: false, message: "Missing Fields" });
 
-  //Checking where a category with this CategoryId exist or not
-  if (!(await findCategoryById(categoryId)))
-    return res.json({ status: false, message: "This Category does not Exist" });
-
   //Checking the length of name
   if (name.length <= 3)
     return res.json({
       status: false,
       message: "Name must be three character long!",
     });
+
+  if ((await checkRole(token)) != 1)
+    return res.json({
+      status: false,
+      message: "Only Admin Can Update An Category!",
+    });
+
+  //Checking where a category with this CategoryId exist or not
+  if (!(await findCategoryById(categoryId)))
+    return res.json({ status: false, message: "This Category does not Exist" });
 
   //Checking category with same name is already exist or not
   let category = await findCategoryByName(name);
@@ -125,6 +137,12 @@ const deleteCategory = async (req, res) => {
   if (!categoryId || categoryId.length < 1)
     return res.json({ status: false, message: "Missing fields!" });
 
+  if ((await checkRole(token)) != 1)
+    return res.json({
+      status: false,
+      message: "Only Admin Can Delete a Category!",
+    });
+
   //Checking where a category with this CategoryId exist or not
   if (!(await findCategoryById(categoryId)))
     return res.json({ status: false, message: "This Category does not Exist" });
@@ -149,6 +167,12 @@ const forceDeleteCategory = async (req, res) => {
   //Checking where any required field missing or not
   if (!categoryId || categoryId.length < 1)
     return res.json({ status: false, message: "Missing fields!" });
+
+  if ((await checkRole(token)) != 1)
+    return res.json({
+      status: false,
+      message: "Only Admin Can Force Delete a Category!",
+    });
 
   //Checking where a category with this CategoryId exist or not
   if (!(await forceFindCategoryById(categoryId)))
@@ -197,6 +221,12 @@ const restoreCategory = async (req, res) => {
   //Checking where any required field missing or not
   if (!categoryId || categoryId.length < 1)
     return res.json({ status: false, message: "Missing fields!" });
+
+  if ((await checkRole(token)) != 1)
+    return res.json({
+      status: false,
+      message: "Only Admin Can Restore a Category!",
+    });
 
   //Checking where category with this id is exist or not
   if (!(await forceFindCategoryById(categoryId)))

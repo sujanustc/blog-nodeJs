@@ -2,6 +2,7 @@ const jwt = require("jsonwebtoken");
 const Category = require("../models").categories;
 const Post = require("../models").posts;
 const Admin = require("../models").admins;
+const User = require("../models").users;
 const ACH = require("../models").admin_category_histories;
 const APH = require("../models").admin_post_histories;
 const Sequelize = require("sequelize");
@@ -168,6 +169,15 @@ const forceFindPostById = async (id) => {
   return result;
 };
 
+const findUserByToken = async (token) => {
+  const result = User.findOne({
+    where: {
+      jwt: token,
+    },
+  });
+  return result;
+};
+
 module.exports = {
   slugMaker,
   verifyToken,
@@ -184,4 +194,5 @@ module.exports = {
   getPostByTitle,
   forceFindPostByTitle,
   forceFindPostById,
+  findUserByToken,
 };

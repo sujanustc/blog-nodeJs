@@ -1,6 +1,7 @@
 const Post = require("../models").posts;
 const Sequelize = require("sequelize");
 const Op = Sequelize.Op;
+const { pagination } = require("pagination-express");
 const { v4: uuidv4 } = require("uuid");
 const {
   slugMaker,
@@ -15,8 +16,10 @@ const {
 } = require("../utils/utils");
 
 const addPost = async (req, res) => {
-  const { title, body, status, keywords, token, categoryId } = req.query;
+  var { title, body, status, keywords, token, categoryId } = req.query;
   //Checking where some required field missing or not
+  keywords = JSON.parse(keywords);
+  console.log(typeof keywords);
   if (!title || !body || !categoryId)
     return res.json({ status: false, message: "Missing Field" });
 
@@ -25,6 +28,12 @@ const addPost = async (req, res) => {
     return res.json({
       status: false,
       message: "minimum length of title and body corresponding 10 and 100!",
+    });
+
+  if ((await checkRole(token)) != 1)
+    return res.json({
+      status: false,
+      message: "Only Admin Can Add a Post!",
     });
 
   //Category Check
@@ -90,6 +99,12 @@ const updatePost = async (req, res) => {
       message: "Minimum length of title and body corresponding 10 and 100!",
     });
 
+  if ((await checkRole(token)) != 1)
+    return res.json({
+      status: false,
+      message: "Only Admin Can Update a Post!",
+    });
+
   //Cheking where this post exist or not with this postId
   if (!(await findPostById(postId)))
     return res.json({ status: false, message: "This Post does not exist" });
@@ -148,6 +163,12 @@ const deletePost = async (req, res) => {
   if (!token || !postId)
     return res.json({ status: false, message: "Missing Fields" });
 
+  if ((await checkRole(token)) != 1)
+    return res.json({
+      status: false,
+      message: "Only Admin Can Delete a Post!",
+    });
+
   if (!(await findPostById(postId)))
     return res.json({
       status: false,
@@ -170,6 +191,12 @@ const restorePost = async (req, res) => {
   if (!token || !postId)
     return res.json({ status: false, message: "Missing Fields" });
 
+  if ((await checkRole(token)) != 1)
+    return res.json({
+      status: false,
+      message: "Only Admin Can Restore a Post!",
+    });
+
   if (!(await forceFindPostById(postId)))
     return res.json({
       status: false,
@@ -191,6 +218,12 @@ const forceDeletePost = async (req, res) => {
 
   if (!token || !postId)
     return res.json({ status: false, message: "Missing Fields" });
+
+  if ((await checkRole(token)) != 1)
+    return res.json({
+      status: false,
+      message: "Only Admin Can Force Delete a Post!",
+    });
 
   if (!(await forceFindPostById(postId)))
     return res.json({
@@ -215,7 +248,9 @@ const forceDeletePost = async (req, res) => {
 
 //Get All Post
 const getAllPosts = async (req, res) => {
-  const allPosts = await Post.findAll();
+  const allPosts = await Post.findAll({
+    order: [["id", "DESC"]],
+  });
   const deletedPosts = await Post.findAll({
     where: {
       deletedAt: {
@@ -227,19 +262,115 @@ const getAllPosts = async (req, res) => {
   console.log();
   if ((await checkRole(req.query.token)) == 1) {
     res.json({
-      "All Active Posts": await parseJson(allPosts),
-      "All Deleted Post": await parseJson(deletedPosts),
+      "All Active Posts": allPosts,
+      "All Deleted Post": deletedPosts,
     });
   }
   res.json({
-    "All Active Posts": await parseJson(allPosts),
+    "All Active Posts": allPosts,
   });
 };
 
+const viewPostById = async (req, res) => {
+  const { token, postId } = req.query;
+
+  if (!token || !postId)
+    return res.json({ status: false, message: "Missing Fields!" });
+
+  const result = await findPostById(postId);
+
+  if (!result)
+    return res.json({ status: false, message: "Post Not found with this Id" });
+
+  result.keywords = JSON.parse(result.keywords);
+  result.keywords = JSON.parse(result.keywords);
+  res.json({ status: true, Post: result });
+};
+
+const viewPostByCategory = async (req, res) => {
+  const { token, categoryId } = req.query;
+
+  if (!token || !categoryId)
+    return res.json({ status: false, message: "Missing Fields!" });
+
+  if (!(await findCategoryById(categoryId)))
+    return res.json({ status: false, message: "This category does not exist" });
+
+  const allPosts = await Post.findAll({
+    where: {
+      categoryId: categoryId,
+    },
+  });
+
+  res.json({ status: true, posts: await parseJson(allPosts) });
+};
+
+const getAllPostsPagination = async (req, res) => {
+  // const { token, pageNo } = req.query;
+
+  // if (!token || !pageNo)
+  //   return res.json({ status: false, message: "Missing Fields!" });
+
+  // if (pageNo < 1)
+  //   return res.json({ status: false, message: "Invalid Page No" });
+
+  // const allPosts = await Post.findAll({ offset: 5 * (pageNo - 1), limit: 5 });
+
+  // res.json(await parseJson(allPosts));
+
+  const { page, limit } = req.query;
+
+  // you can use all sequelize ORM query here........
+  const query = {
+    // attributes: ["firstName", "lastName"],
+    where: {
+      status: 1,
+    },
+  };
+
+  const option = {
+    req: req,
+    page: page,
+    limit: 5, // give a limit
+    metatags: "paginationInfo", // Optional for change default name of metatags
+    lists: "allPosts", // Optional for change default name of list
+    range: 5,
+  };
+
+  pagination(Post, option, { ...query }, async (response) => {
+    await parseJson(response.allPosts);
+    res.json({ payload: response });
+  });
+};
+
+const getAllPostsByCategoryPagination = async (req, res) => {
+  const { token, pageNo, categoryId } = req.query;
+
+  if (!token || !pageNo || !categoryId)
+    return res.json({ status: false, message: "Missing Fields!" });
+
+  if (pageNo < 1)
+    return res.json({ status: false, message: "Invalid Page No" });
+
+  if (!(await findCategoryById(categoryId)))
+    return res.json({ status: false, message: "Category Not Found" });
+
+  const allPosts = await Post.findAll({
+    where: {
+      categoryId: categoryId,
+    },
+    offset: 5 * (pageNo - 1),
+    limit: 5,
+  });
+
+  res.json(await parseJson(allPosts));
+};
+
 const parseJson = async (allPosts) => {
+  //console.log(allPosts.length);
   allPosts.forEach((element) => {
     element.keywords = JSON.parse(element.keywords);
-    element.keywords = JSON.parse(element.keywords);
+    //element.keywords = JSON.parse(element.keywords);
   });
   return allPosts;
 };
@@ -255,4 +386,8 @@ module.exports = {
   deletePost,
   restorePost,
   forceDeletePost,
+  viewPostById,
+  viewPostByCategory,
+  getAllPostsPagination,
+  getAllPostsByCategoryPagination,
 };
